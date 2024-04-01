@@ -1,0 +1,160 @@
+####################################################################
+# 
+# OpenSSL root CA certificate configuration file.
+# Copy to `/tmp/gen-ssl-cert/ca.cnf`.
+# By WangYan <me@wangyan.org>
+#
+####################################################################
+#
+####################################################################
+# Default CA configuration
+####################################################################
+[ ca ]
+default_ca	    = ca_default
+
+# Directory and file locations.
+[ ca_default ]
+dir             = /tmp/gen-ssl-cert/ca
+certs           = $dir/certs
+crl_dir	        = $dir/crl
+new_certs_dir	= $dir/newcerts
+database        = $dir/index.txt
+serial	        = $dir/serial
+RANDFILE        = $dir/.rand
+
+# The root key and root certificate.
+private_key	    = $dir/private/ca-key.pem
+certificate 	= $dir/certs/ca-cert.crt
+
+# For certificate revocation lists.
+crl             = $dir/crl/ca-crl.pem
+crlnumbe        = $dir/crlnumber
+crl_extensions	= crl_ext
+default_crl_days= 30
+
+# SHA-1 is deprecated, so use SHA-2 instead.
+default_md      = sha256
+
+name_opt        = ca_default
+cert_opt        = ca_default
+default_days    = 3750
+unique_subject  = no
+preserve        = no
+policy          = policy_anything
+
+# The root CA should only sign intermediate certificates that match.
+[ policy_match ]
+countryName            = match
+stateOrProvinceName    = match
+organizationName       = match
+organizationalUnitName = optional
+commonName             = supplied
+emailAddress           = optional
+
+# Allow the intermediate CA to sign a more diverse range of certificates.
+[ policy_anything ]
+countryName            = optional
+stateOrProvinceName    = optional
+localityName           = optional
+organizationName       = optional
+organizationalUnitName = optional
+commonName             = supplied
+emailAddress           = optional
+
+####################################################################
+# Certificate Request policies
+####################################################################
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+
+# SHA-1 is deprecated, so use SHA-2 instead.
+default_md          = sha256
+
+# Extension to add when the -x509 option is used.
+x509_extensions     = v3_ca
+
+# This section declares the information normally required in a certificate signing request. 
+[ req_distinguished_name ]
+countryName = Country Name (2 letter code)
+countryName_default = CN
+stateOrProvinceName = State or Province Name (full name)
+stateOrProvinceName_default = Guangdong
+localityName = Locality Name (eg, city)
+localityName_default = Zhuhai
+organizationName = Organization Name (eg, company)
+organizationName_default = Selfsigned
+organizationalUnitName = Organizational Unit Name (eg, section)
+organizationalUnitName_default = Selfsigned
+commonName = Common Name (eg, server FQDN or YOUR name)
+commonName_default = 
+emailAddress = Email Address (eg, admin@example.com)
+emailAddress_default = 
+
+####################################################################
+# Certificates extensions policies
+####################################################################
+
+# The Root Certificates
+# Extensions for a typical CA (`man x509v3_config`).
+# https://www.openssl.org/docs/manmaster/man5/x509v3_config.html
+[ v3_ca ]
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer
+basicConstraints        = critical, CA:true
+keyUsage                = cRLSign, keyCertSign
+
+# The Intermediate Certificates
+[ v3_intermediate_ca ]
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer
+basicConstraints        = critical, CA:true, pathlen:0
+keyUsage                = digitalSignature, cRLSign, keyCertSign
+
+# The Client Certificate
+[ usr_cert ]
+basicConstraints        = CA:FALSE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer
+keyUsage                = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, keyAgreement
+extendedKeyUsage        = clientAuth,codeSigning,emailProtection,timeStamping
+
+# The Server Certificate
+[ server_cert ]
+basicConstraints        = CA:FALSE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer:always
+keyUsage                = digitalSignature, nonRepudiation, keyAgreement
+extendedKeyUsage        = serverAuth
+subjectAltName          = @alt_section
+crlDistributionPoints   = @crl_section
+authorityInfoAccess     = @ocsp_section
+
+# The crl_ext will applied when creating certificate revocation lists.
+[ crl_ext ]
+authorityKeyIdentifier  = keyid:always
+
+[ ocsp ]
+# Extension for OCSP signing certificates (`man ocsp`).
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = digitalSignature
+extendedKeyUsage = OCSPSigning
+
+####################################################################
+# Custom Section
+####################################################################
+
+[ alt_section ]
+DNS.1                   = wangyan.cloud
+DNS.2                   = *.wangyan.cloud
+IP.1                    = 119.29.17.197
+IP.2                    = 101.32.204.113
+
+[crl_section]
+URI = http://safe.wangyan.cloud/crl/ica-crl.pem
+
+[ocsp_section]
+OCSP;URI = http://safe.wangyan.cloud/ocsp/
