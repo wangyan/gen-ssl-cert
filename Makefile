@@ -127,7 +127,7 @@ gen-ica-chain:
 
 # Create Server Key
 gen-server-key:
-	openssl genrsa -out ica/private/server-key.pem 2048
+	openssl genrsa -out ica/private/server-key.pem -traditional 4096
 
 # Create Server CSR File
 gen-server-csr:
@@ -163,16 +163,16 @@ gen-server-full:
 
 # Create Client Key
 gen-client-key:
-	openssl genrsa -out ica/private/client-key.pem 2048
+	openssl genrsa -out ica/private/client-key.pem -traditional 4096
 
 # Create Client CSR File
 gen-client-csr:
 	openssl req -config ica.cnf \
 		-new -sha256 \
         -key ica/private/client-key.pem \
-		-subj "/C=CN/ST=Guangdong/L=Zhuhai/O=Selfsigned/CN=db.wangyan.cloud" \
+		-subj "/C=CN/ST=Guangdong/L=Zhuhai/O=Selfsigned/CN=wangyan.cloud" \
         -out ica/csr/client-csr.pem \
-		-addext "subjectAltName = IP:119.29.17.197,DNS:db.wangyan.cloud"
+		-addext "subjectAltName = IP:119.29.17.197,IP:101.32.204.113,DNS:wangyan.cloud,DNS:*.wangyan.cloud"
 
 # Create Client Certificate
 gen-client-cert:
